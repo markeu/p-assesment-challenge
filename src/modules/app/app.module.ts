@@ -6,7 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import * as redisStore from 'cache-manager-redis-store';
 
 import { StatusModule } from '../../modules/status/status.module';
-
+import { RankingModule } from '../../modules/ranking/ranking.module';
 import { AppController } from './app.controller';
 
 import { REDIS_CACHE_OPTIONS } from '../../infra/cache/redis/config.redis';
@@ -23,6 +23,7 @@ import type { ClientOpts } from '../../infra/cache/redis/config.redis';
         ThrottlerModule.forRoot({
             ...THROTTLER_CONFIG,
         }),
+        RankingModule,
         StatusModule,
     ],
     controllers: [AppController],
