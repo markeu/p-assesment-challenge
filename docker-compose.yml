@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  caching-layer:
+    image: redis
+    container_name: caching-layer
+    environment:
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+    networks:
+      - shared-network
+    restart: on-failure
+  server-layer:
+    depends_on:
+      - caching-layer
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=caching-layer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    container_name: server-layer
+    expose:
+      - '4000'
+    ports:
+      - '4000:4000'
+    command: npm run dev
+    networks:
+      - shared-network
+    restart: on-failure
+
+networks:
+  shared-network:
