@@ -1,14 +1,15 @@
-import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UseInterceptors, Query } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RankingService } from './ranking.service';
-
+import { RankingDto } from './ranking.dto';
+import { RankingType } from './ranking.type';
 @Controller('ranking')
 export class RankingController {
     constructor(private readonly service: RankingService) {}
 
     @UseInterceptors(CacheInterceptor)
-    @Get('/:date')
-    async getRanking(@Param('date') date: string): Promise<any> {
-        return await this.service.getRanking(date);
+    @Get('/')
+    async getRanking(@Query() query: RankingDto): Promise<RankingType> {
+        return await this.service.getRanking(query);
     }
 }

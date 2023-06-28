@@ -2,6 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import { RankingDto } from './ranking.dto';
+import { RankingType } from './ranking.type';
 
 @Injectable()
 export class RankingService {
@@ -10,41 +12,60 @@ export class RankingService {
         @Inject(CACHE_MANAGER) private cacheService: Cache,
     ) {}
 
-    async getRanking(date: string): Promise<any> {
-        // check if data is in cache:
-        const cachedData = await this.cacheService.get<any>(date.toString());
+    async getRanking(rankingDto: RankingDto): Promise<RankingType> {
+        const cachedData = await this.cacheService.get<any>(
+            rankingDto.date.toString(),
+        );
         if (cachedData) {
             console.log(`Getting data from cache!`);
-            return cachedData;
+            return this.filterAndLimitData(
+                cachedData,
+                rankingDto.language,
+                rankingDto.limit,
+            );
         }
 
-        // if not, call API and set the cache:
         const { data } = await this.httpService.axiosRef.get(
-            `https://raw.githubusercontent.com/EvanLi/Github-Ranking/master/Data/github-ranking-${date}.csv`,
+            `https://raw.githubusercontent.com/EvanLi/Github-Ranking/master/Data/github-ranking-${rankingDto.date}.csv`,
         );
 
         const jsonData = this.csvToJson(data);
-        await this.cacheService.set(date.toString(), jsonData);
+        const filteredData = this.filterAndLimitData(
+            jsonData,
+            rankingDto.language,
+            rankingDto.limit,
+        );
+        await this.cacheService.set(rankingDto.date.toString(), filteredData);
 
-        return jsonData;
+        return filteredData;
     }
 
-    private csvToJson(csvData: string): any[] {
-        const lines = csvData.split('\n');
+    private csvToJson(csvData: string): RankingType {
+        const lines = csvData.split(/\r?\n/);
         const headers = lines[0].split(',');
 
-        const result = [];
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',');
+        return lines.slice(1).map((line) => {
+            const values = line.split(',');
             const obj: any = {};
-            for (let j = 0; j < headers.length; j++) {
-                obj[headers[j]] = values[j];
-            }
-            result.push(obj);
-        }
+            headers.forEach((header, index) => {
+                obj[header] = values[index];
+            });
+            return obj;
+        });
+    }
 
-        return result;
+    private filterAndLimitData(
+        data: any[],
+        language: string,
+        limit: number,
+    ): RankingType {
+        const lowerCaseLanguage = language.toLowerCase();
+
+        return data
+            .filter(
+                (item) => item.language?.toLowerCase() === lowerCaseLanguage,
+            )
+            .sort((a, b) => a.rank.localeCompare(b.rank))
+            .slice(0, limit);
     }
 }
-
-// export default new RankingService();
