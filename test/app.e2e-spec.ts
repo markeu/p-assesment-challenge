@@ -17,10 +17,10 @@ describe('AppController (e2e)', () => {
 
     it('/status (GET)', () => {
         return request(app.getHttpServer()).get('/status').expect(200).expect({
-            name: 'nestjs-rest-boilerplate',
-            version: '0.0.1',
-            creator: 'Hebert Barros <hebert@hotbrains.com.br>',
+            name: 'parloa-backend-challenge',
+            version: '0.0.1.',
             status: 'online',
+            environment: 'test',
         });
     });
 });
