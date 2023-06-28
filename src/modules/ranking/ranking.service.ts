@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+
 import { RankingDto } from './ranking.dto';
 import { RankingType } from './ranking.type';
 
@@ -13,7 +14,7 @@ export class RankingService {
     ) {}
 
     async getRanking(rankingDto: RankingDto): Promise<RankingType> {
-        const cachedData = await this.cacheService.get<any>(
+        const cachedData = await this.cacheService.get<RankingType>(
             rankingDto.date.toString(),
         );
         if (cachedData) {
@@ -30,12 +31,12 @@ export class RankingService {
         );
 
         const jsonData = this.csvToJson(data);
+        await this.cacheService.set(rankingDto.date.toString(), jsonData);
         const filteredData = this.filterAndLimitData(
             jsonData,
             rankingDto.language,
             rankingDto.limit,
         );
-        await this.cacheService.set(rankingDto.date.toString(), filteredData);
 
         return filteredData;
     }
@@ -55,7 +56,7 @@ export class RankingService {
     }
 
     private filterAndLimitData(
-        data: any[],
+        data: RankingType,
         language: string,
         limit: number,
     ): RankingType {
