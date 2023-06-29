@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-layer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server-layer
+  template:
+    metadata:
+      labels:
+        app: server-layer
+    spec:
+      containers:
+        - name: server-layer
+          image: DOCKER_IMAGE_NAME:TAG 
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: REDIS_HOST
+              value: "caching-layer"
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "0.5"

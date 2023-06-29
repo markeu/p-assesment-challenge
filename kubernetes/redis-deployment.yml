@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caching-layer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caching-layer
+  template:
+    metadata:
+      labels:
+        app: caching-layer
+    spec:
+      containers:
+        - name: caching-layer
+          image: redis
+          ports:
+            - containerPort: 6379
