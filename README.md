@@ -1,4 +1,4 @@
-# Backend-Assesment-Case-Study
+# Backend-Assessment-Case-Study
 
 ## Technologies
 
@@ -96,7 +96,4 @@ Once the deployment and service are created, you can access the application by f
   - Host: `redis-service`
   - Port: `6379`
 
-<p align="center">
-  <img src="diagram.png" alt="Architecture Diagram" width="500" />
-</p>
 
